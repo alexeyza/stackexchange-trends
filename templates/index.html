@@ -1,0 +1,130 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>StackExchange Trends</title>
+  <link rel="stylesheet" href="static/style.css">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script>
+  google.load("visualization", "1", {packages:["LineChart"]});
+  google.setOnLoadCallback(drawChart);
+  function drawChart() {
+    var datalist = {{ value|tojson }};
+
+    var prev_year = datalist[0][0].split("-")[0];
+    var prev_month = (datalist[0][0].split("-")[1]-1 -2)>0 ? (datalist[0][0].split("-")[1]-1 -3):0;
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Date');
+    data.addColumn('number', '{{ keyword }}');
+    if ('{{ keyword2 }}'!==''){
+      data.addColumn('number', '{{ keyword2 }}');
+    }
+    for (var i=0;i<datalist.length;i++){
+      var date_val = datalist[i][0].split("-");
+      var cur_year = date_val[0];
+      var cur_month = date_val[1]-1;
+      for (var month=prev_month;(month<cur_month)||(prev_year<cur_year);month++){
+        if (month==12){
+          prev_year++;
+          month=0;
+        }
+        if ('{{ keyword2 }}'!==''){
+          if (month<cur_month){
+            data.addRows([    
+              [new Date(prev_year,month),0,0]
+              ]);
+          }
+        }else{
+          if (month<cur_month){
+            data.addRows([    
+              [new Date(prev_year,month),0]
+              ]);
+          }
+        }
+      }
+      prev_month = cur_month+1;
+      if ('{{ keyword2 }}'!==''){
+        data.addRows([    
+          [new Date(date_val[0],date_val[1]-1),datalist[i][1],datalist[i][2]]
+        ]);
+      }else{
+        data.addRows([    
+          [new Date(date_val[0],date_val[1]-1),datalist[i][1]]
+        ]);
+      }
+    }
+    var options = {legend: 'none',};
+
+    var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+    chart.draw(data, options);
+
+
+    //     var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));
+    //  chart.draw(data, {displayAnnotations: true});
+  }
+
+  </script>
+
+  <script type='text/javascript'>
+  google.load('visualization', '1', {'packages': ['geochart']});
+  google.setOnLoadCallback(drawRegionsMap);
+
+  function drawRegionsMap() {
+    var data = google.visualization.arrayToDataTable([
+      ['Country','Posts']
+      ].concat({{ countries|tojson }}));
+
+    var options2 = {colorAxis: {colors: ['#D4EBFF','#336699'],}};
+
+    var chart = new google.visualization.GeoChart(document.getElementById('map_chart'));
+    chart.draw(data, options2);
+  };
+  </script>
+      <script type='text/javascript'>
+      google.load('visualization', '1', {packages:['table']});
+      google.setOnLoadCallback(drawTable);
+      function drawTable() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Tag');
+        data.addColumn('number', 'Co-occuring Posts');
+        data.addRows({{ co_appearing_tag_list|tojson }});
+        var table = new google.visualization.Table(document.getElementById('table_div'));
+        var options = {}
+        table.draw(data,options);
+      }
+    </script>
+</head>
+<body>
+  <div class="hero-unit">
+    <h1>StackExchange Trends</h1>
+  </div>
+  <div class="subject-unit">
+  <p>Search for a tag of interest</p>
+    <form action="/search" method="POST">
+    <input type="text" id='text' name="text" value = '{{ query }}'>
+    <input type="image" id='submit-button' src="/static/search.png"/>
+    
+  </form>
+</div>
+  <div class="subject-unit">
+  <p>Interest over time</p>
+</div>
+  <div id="chart_div" class="charts" style="width: 900px; height: 500px;" ></div>
+  <br>
+  <div class="subject-unit">
+  <p>Regional interest</p>
+</div>
+  <div id="map_chart" class="charts" style="width: 900px; height: 500px;"></div>
+<div class="subject-unit">
+  <p>Top co-occuring tags</p>
+</div>
+  <div id='table_div' class="charts"></div>
+</body>
+</html>        
