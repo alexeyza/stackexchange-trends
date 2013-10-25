@@ -2,7 +2,7 @@
 
 This web application allows to explore trends based on [Stack Exchange network](http://stackexchange.com/) tags, and see various visualizations to reveal cool new insights regarding the tags and the posts attached to them.
 
-![alt text](https://github.com/alexeyza/stackexchange-trends/raw/master/screenshot.jpg"Stack Exchange Trends Screenshot")
+![alt text](https://github.com/alexeyza/stackexchange-trends/raw/master/screenshot.jpg "Stack Exchange Trends Screenshot")
 
 ## How to Use
 Follow these steps:
